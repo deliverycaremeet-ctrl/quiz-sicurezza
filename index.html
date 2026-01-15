@@ -617,9 +617,61 @@
                 <div class="cta-section">
                     <h3>Vuoi migliorare la sicurezza della tua azienda?</h3>
                     <p>Il team di Delivery Care SRL è a tua disposizione per consulenze personalizzate, audit di sicurezza e programmi di formazione su misura.</p>
-                    <button class="contact-btn" onclick="window.open('https://www.deliverycare.it', '_blank')">
-                        Contattaci Ora
+                    
+                    <div style="margin: 30px 0;">
+                        <h3 style="margin-bottom: 15px;">📞 Contattaci Ora</h3>
+                        <a href="tel:0250047124" style="color: white; font-size: 2em; font-weight: 900; text-decoration: none; display: inline-block; background: rgba(255,255,255,0.2); padding: 15px 30px; border-radius: 10px; margin-bottom: 20px;">
+                            02 5004 7124
+                        </a>
+                    </div>
+
+                    <div style="margin: 20px 0; color: white; font-size: 1.2em; font-weight: 600;">
+                        OPPURE
+                    </div>
+
+                    <button class="contact-btn" onclick="showContactForm()">
+                        📧 Lasciaci i Tuoi Contatti
                     </button>
+                </div>
+
+                <!-- Form di contatto (inizialmente nascosto) -->
+                <div id="contactFormSection" style="display: none; margin-top: 30px; padding: 30px; background: white; border-radius: 15px;">
+                    <h3 style="color: #667eea; margin-bottom: 20px;">Lasciaci i tuoi contatti</h3>
+                    <p style="color: #666; margin-bottom: 20px;">Ti ricontatteremo entro 24 ore per una consulenza gratuita personalizzata.</p>
+                    
+                    <form id="contactForm" onsubmit="submitContactForm(event)">
+                        <div style="margin-bottom: 15px;">
+                            <input type="text" id="nome" name="nome" placeholder="Nome e Cognome *" required 
+                                   style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <input type="text" id="azienda" name="azienda" placeholder="Nome Azienda *" required
+                                   style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <input type="email" id="email" name="email" placeholder="Email *" required
+                                   style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <input type="tel" id="telefono" name="telefono" placeholder="Telefono *" required
+                                   style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <textarea id="messaggio" name="messaggio" placeholder="Note aggiuntive (opzionale)" rows="3"
+                                      style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em; resize: vertical;"></textarea>
+                        </div>
+                        <div style="margin-bottom: 15px; font-size: 0.9em; color: #666;">
+                            <label style="display: flex; align-items: start; gap: 10px;">
+                                <input type="checkbox" id="privacy" name="privacy" required style="margin-top: 3px;">
+                                <span>Acconsento al trattamento dei dati personali secondo la <a href="#" style="color: #667eea;">privacy policy</a> *</span>
+                            </label>
+                        </div>
+                        <button type="submit" id="submitBtn"
+                                style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 15px; font-size: 1.1em; border-radius: 50px; cursor: pointer; font-weight: bold;">
+                            Invia Richiesta
+                        </button>
+                        <div id="formMessage" style="margin-top: 15px; padding: 10px; border-radius: 8px; display: none;"></div>
+                    </form>
                 </div>
                 <button class="restart-btn" onclick="restartQuiz()">🔄 Rifai il Quiz</button>
             `;
@@ -635,7 +687,141 @@
             answers = [];
             document.getElementById('results').style.display = 'none';
             document.getElementById('intro').style.display = 'block';
+            document.getElementById('contactFormSection').style.display = 'none';
         }
+
+        // Funzione per mostrare il form di contatto
+        function showContactForm() {
+            const formSection = document.getElementById('contactFormSection');
+            if (formSection.style.display === 'none') {
+                formSection.style.display = 'block';
+                formSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                formSection.style.display = 'none';
+            }
+        }
+
+        // Funzione per inviare il form
+        async function submitContactForm(event) {
+            event.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const formMessage = document.getElementById('formMessage');
+            
+            // Disabilita il pulsante durante l'invio
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Invio in corso...';
+            
+            // Raccogli i dati del form
+            const formData = {
+                nome: document.getElementById('nome').value,
+                azienda: document.getElementById('azienda').value,
+                email: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value,
+                messaggio: document.getElementById('messaggio').value,
+                punteggio_quiz: score,
+                percentuale: Math.round((score / 100) * 100),
+                data: new Date().toLocaleString('it-IT'),
+                source: 'Quiz Sicurezza'
+            };
+
+            try {
+                // Invia i dati a Formspree (servizio gratuito)
+                const response = await fetch('https://formspree.io/f/xkoogvpv', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    // Successo
+                    formMessage.style.display = 'block';
+                    formMessage.style.background = '#d1fae5';
+                    formMessage.style.color = '#065f46';
+                    formMessage.style.border = '2px solid #10b981';
+                    formMessage.innerHTML = '✅ <strong>Grazie!</strong> La tua richiesta è stata inviata con successo. Ti contatteremo entro 24 ore.';
+                    
+                    // Reset del form
+                    document.getElementById('contactForm').reset();
+                    
+                    // Tracking evento conversione
+                    if (typeof gtag !== 'undefined') {
+                        gtag('event', 'form_submission', {
+                            'event_category': 'Contact',
+                            'event_label': 'Quiz Contact Form'
+                        });
+                    }
+                } else {
+                    throw new Error('Errore nell\'invio');
+                }
+            } catch (error) {
+                // Errore
+                formMessage.style.display = 'block';
+                formMessage.style.background = '#fee2e2';
+                formMessage.style.color = '#991b1b';
+                formMessage.style.border = '2px solid #ef4444';
+                formMessage.innerHTML = '❌ <strong>Errore:</strong> Si è verificato un problema. Riprova o contattaci direttamente al 02 5004 7124.';
+            } finally {
+                // Riabilita il pulsante
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Invia Richiesta';
+            }
+        }
+
+        // TRACKING - Conta le visite al quiz
+        (function() {
+            // Tracking inizio quiz
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'page_view', {
+                    'page_title': 'Quiz Sicurezza',
+                    'page_location': window.location.href
+                });
+            }
+        })();
+
+        // Override della funzione startQuiz per tracking
+        const originalStartQuiz = startQuiz;
+        startQuiz = function() {
+            // Tracking inizio quiz
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'quiz_start', {
+                    'event_category': 'Quiz',
+                    'event_label': 'Started Quiz'
+                });
+            }
+            originalStartQuiz();
+        };
+
+        // Override della funzione showResults per tracking
+        const originalShowResults = showResults;
+        showResults = function() {
+            originalShowResults();
+            
+            // Tracking completamento quiz
+            const maxScore = questions.reduce((sum, q) => sum + Math.max(...q.options.map(o => o.points)), 0);
+            const percentage = Math.round((score / maxScore) * 100);
+            
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'quiz_complete', {
+                    'event_category': 'Quiz',
+                    'event_label': 'Completed Quiz',
+                    'value': percentage
+                });
+            }
+        };
     </script>
+
+    <!-- Google Analytics (Sostituisci G-XXXXXXXXXX con il tuo ID) -->
+    <!-- 
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX');
+    </script>
+    -->
 </body>
 </html>
