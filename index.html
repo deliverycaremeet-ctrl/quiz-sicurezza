@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Sicurezza sul Lavoro - Delivery Care SRL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .intro {
+            padding: 30px;
+            text-align: center;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .intro h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .intro p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+            font-weight: bold;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .quiz-content {
+            padding: 30px;
+            display: none;
+        }
+
+        .question-container {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .question-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .question {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .option input[type="radio"] {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .option label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 1.05em;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 25px;
+            transition: transform 0.2s;
+            font-weight: bold;
+            float: right;
+        }
+
+        .next-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+        }
+
+        .next-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results {
+            display: none;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            margin: 30px auto;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .result-title {
+            font-size: 2em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .result-description {
+            font-size: 1.2em;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .recommendations {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: left;
+            margin-top: 30px;
+        }
+
+        .recommendations h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .recommendations ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .recommendations li {
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+            color: #555;
+        }
+
+        .recommendations li:last-child {
+            border-bottom: none;
+        }
+
+        .recommendations li::before {
+            content: "✓ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .cta-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            color: white;
+        }
+
+        .cta-section h3 {
+            margin-bottom: 15px;
+        }
+
+        .cta-section p {
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .contact-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1em;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .contact-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .restart-btn {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 10px 25px;
+            font-size: 0.9em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.2s;
+        }
+
+        .restart-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .question {
+                font-size: 1.1em;
+            }
+            
+            .score-circle {
+                width: 150px;
+                height: 150px;
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ Quiz Sicurezza sul Lavoro</h1>
+            <p>Valuta il livello di compliance della tua azienda</p>
+        </div>
+
+        <div class="intro" id="intro">
+            <h2>Scopri quanto è sicura la tua azienda</h2>
+            <p>Un test rapido di 12 domande per valutare l'adeguatezza delle tue norme di sicurezza.</p>
+            <p><strong>Tempo stimato: 3-5 minuti</strong></p>
+            <p style="font-size: 0.9em; color: #888; margin-top: 15px;">
+                Questo quiz ti aiuterà a identificare le aree di miglioramento nella gestione della sicurezza aziendale.
+            </p>
+            <button class="start-btn" onclick="startQuiz()">Inizia il Quiz</button>
+        </div>
+
+        <div class="quiz-content" id="quizContent">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            <div id="questionsContainer"></div>
+        </div>
+
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Il Documento di Valutazione dei Rischi (DVR) della vostra azienda è:",
+                options: [
+                    { text: "Aggiornato regolarmente e accessibile a tutti i lavoratori", points: 10 },
+                    { text: "Presente ma non aggiornato negli ultimi 2 anni", points: 5 },
+                    { text: "Esistente ma non facilmente consultabile", points: 3 },
+                    { text: "Non disponibile o mai redatto", points: 0 }
+                ]
+            },
+            {
+                question: "Con quale frequenza viene erogata la formazione obbligatoria sulla sicurezza?",
+                options: [
+                    { text: "Regolarmente secondo le scadenze di legge con aggiornamenti periodici", points: 10 },
+                    { text: "Solo all'assunzione dei nuovi dipendenti", points: 4 },
+                    { text: "In modo irregolare quando ricordiamo le scadenze", points: 2 },
+                    { text: "Mai o quasi mai", points: 0 }
+                ]
+            },
+            {
+                question: "I Dispositivi di Protezione Individuale (DPI) nella vostra azienda:",
+                options: [
+                    { text: "Sono forniti gratuitamente, certificati e sostituiti quando necessario", points: 10 },
+                    { text: "Sono disponibili ma non sempre adeguati o certificati", points: 5 },
+                    { text: "I lavoratori devono procurarseli autonomamente", points: 1 },
+                    { text: "Non sono previsti o utilizzati", points: 0 }
+                ]
+            },
+            {
+                question: "La sorveglianza sanitaria dei lavoratori esposti a rischi specifici:",
+                options: [
+                    { text: "È gestita con protocollo definito dal medico competente e rispettata", points: 10 },
+                    { text: "È attiva ma con ritardi nelle visite periodiche", points: 5 },
+                    { text: "È prevista solo per alcune categorie", points: 2 },
+                    { text: "Non è attiva o presente", points: 0 }
+                ]
+            },
+            {
+                question: "Il piano di emergenza ed evacuazione è:",
+                options: [
+                    { text: "Redatto, esposto, con prove periodiche documentate", points: 10 },
+                    { text: "Presente ma mai testato con simulazioni", points: 5 },
+                    { text: "Presente solo sulla carta senza coinvolgimento dei lavoratori", points: 2 },
+                    { text: "Inesistente o non conosciuto dai lavoratori", points: 0 }
+                ]
+            },
+            {
+                question: "Gli addetti al primo soccorso e antincendio sono:",
+                options: [
+                    { text: "Nominati, formati e con aggiornamenti regolari", points: 10 },
+                    { text: "Nominati ma con formazione scaduta", points: 4 },
+                    { text: "Presenti ma senza formazione adeguata", points: 1 },
+                    { text: "Non nominati o non formati", points: 0 }
+                ]
+            },
+            {
+                question: "Le attrezzature di lavoro (macchinari, scale, impianti) vengono:",
+                options: [
+                    { text: "Controllate e manutenute secondo piano periodico documentato", points: 10 },
+                    { text: "Controllate solo in caso di malfunzionamenti", points: 4 },
+                    { text: "Utilizzate senza controlli sistematici", points: 1 },
+                    { text: "Mai controllate o manutenute", points: 0 }
+                ]
+            },
+            {
+                question: "La segnaletica di sicurezza (uscite, estintori, divieti) è:",
+                options: [
+                    { text: "Completa, visibile, conforme e mantenuta in buono stato", points: 8 },
+                    { text: "Presente ma parziale o poco visibile", points: 4 },
+                    { text: "Scarsa o obsoleta", points: 1 },
+                    { text: "Assente o inadeguata", points: 0 }
+                ]
+            },
+            {
+                question: "Come vengono gestiti gli infortuni e i mancati infortuni (near miss)?",
+                options: [
+                    { text: "Registrati, analizzati e utilizzati per azioni correttive", points: 8 },
+                    { text: "Registrati ma senza analisi approfondita", points: 4 },
+                    { text: "Gestiti solo burocraticamente per obbligo", points: 2 },
+                    { text: "Non tracciati o ignorati", points: 0 }
+                ]
+            },
+            {
+                question: "Il Rappresentante dei Lavoratori per la Sicurezza (RLS):",
+                options: [
+                    { text: "È eletto, formato e coinvolto attivamente nelle decisioni", points: 8 },
+                    { text: "È presente ma raramente consultato", points: 4 },
+                    { text: "È una figura nominale senza ruolo effettivo", points: 1 },
+                    { text: "Non è presente in azienda", points: 0 }
+                ]
+            },
+            {
+                question: "La valutazione dei rischi specifici (stress lavoro-correlato, movimentazione carichi, videoterminali) è:",
+                options: [
+                    { text: "Completa, documentata e con misure di prevenzione attive", points: 8 },
+                    { text: "Parziale o non aggiornata", points: 4 },
+                    { text: "Generica e senza misure concrete", points: 2 },
+                    { text: "Assente", points: 0 }
+                ]
+            },
+            {
+                question: "Come viene promossa la cultura della sicurezza in azienda?",
+                options: [
+                    { text: "Con campagne, comunicazioni costanti e coinvolgimento attivo", points: 8 },
+                    { text: "Solo attraverso la formazione obbligatoria", points: 4 },
+                    { text: "In modo sporadico e poco efficace", points: 2 },
+                    { text: "Non viene promossa", points: 0 }
+                ]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answers = [];
+
+        function startQuiz() {
+            document.getElementById('intro').style.display = 'none';
+            document.getElementById('quizContent').style.display = 'block';
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const container = document.getElementById('questionsContainer');
+            const q = questions[currentQuestion];
+            
+            let optionsHTML = '';
+            q.options.forEach((option, index) => {
+                optionsHTML += `
+                    <div class="option" onclick="selectOption(${index})">
+                        <input type="radio" name="question${currentQuestion}" id="option${index}" value="${option.points}">
+                        <label for="option${index}">${option.text}</label>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = `
+                <div class="question-container active">
+                    <div class="question-number">Domanda ${currentQuestion + 1} di ${questions.length}</div>
+                    <div class="question">${q.question}</div>
+                    <div class="options">
+                        ${optionsHTML}
+                    </div>
+                    <button class="next-btn" id="nextBtn" onclick="nextQuestion()" disabled>
+                        ${currentQuestion === questions.length - 1 ? 'Vedi Risultati' : 'Prossima Domanda →'}
+                    </button>
+                </div>
+            `;
+
+            updateProgress();
+        }
+
+        function selectOption(index) {
+            const radios = document.querySelectorAll(`input[name="question${currentQuestion}"]`);
+            radios[index].checked = true;
+            document.getElementById('nextBtn').disabled = false;
+
+            // Visual feedback
+            document.querySelectorAll('.option').forEach((opt, i) => {
+                if (i === index) {
+                    opt.style.borderColor = '#667eea';
+                    opt.style.background = '#f0f4ff';
+                } else {
+                    opt.style.borderColor = '#e0e0e0';
+                    opt.style.background = '#f8f9fa';
+                }
+            });
+        }
+
+        function nextQuestion() {
+            const selected = document.querySelector(`input[name="question${currentQuestion}"]:checked`);
+            if (!selected) return;
+
+            score += parseInt(selected.value);
+            answers.push({
+                question: currentQuestion,
+                points: parseInt(selected.value)
+            });
+
+            currentQuestion++;
+
+            if (currentQuestion < questions.length) {
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function updateProgress() {
+            const progress = (currentQuestion / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showResults() {
+            const maxScore = questions.reduce((sum, q) => sum + Math.max(...q.options.map(o => o.points)), 0);
+            const percentage = Math.round((score / maxScore) * 100);
+
+            let level, color, description, recommendations;
+
+            if (percentage >= 91) {
+                level = "ECCELLENTE";
+                color = "#10b981";
+                description = "Complimenti! La vostra azienda dimostra un'eccellente gestione della sicurezza sul lavoro con una compliance ottimale alle normative.";
+                recommendations = [
+                    "Mantenere gli standard elevati attuali",
+                    "Condividere le best practice con altre organizzazioni",
+                    "Considerare certificazioni volontarie (ISO 45001)",
+                    "Implementare sistemi di miglioramento continuo"
+                ];
+            } else if (percentage >= 76) {
+                level = "BUONO";
+                color = "#22c55e";
+                description = "Ottimo lavoro! Il vostro sistema di sicurezza è efficace, con margini di miglioramento in alcune aree specifiche.";
+                recommendations = [
+                    "Rafforzare le aree con punteggio più basso",
+                    "Intensificare la formazione continua",
+                    "Migliorare la comunicazione interna sulla sicurezza",
+                    "Implementare audit periodici più frequenti"
+                ];
+            } else if (percentage >= 61) {
+                level = "SUFFICIENTE";
+                color = "#eab308";
+                description = "La compliance di base è presente, ma sono necessari miglioramenti significativi per garantire la piena sicurezza dei lavoratori.";
+                recommendations = [
+                    "Aggiornare urgentemente il DVR",
+                    "Programmare formazione sistematica",
+                    "Verificare e implementare i DPI mancanti",
+                    "Attivare la sorveglianza sanitaria dove necessario",
+                    "Consultare un professionista della sicurezza"
+                ];
+            } else if (percentage >= 41) {
+                level = "INSUFFICIENTE";
+                color = "#f97316";
+                description = "Attenzione: sono presenti lacune importanti nella gestione della sicurezza. È necessario un piano di intervento strutturato.";
+                recommendations = [
+                    "Consulenza urgente con un esperto di sicurezza",
+                    "Redazione o aggiornamento completo del DVR",
+                    "Avvio immediato dei percorsi formativi obbligatori",
+                    "Nomina del medico competente e RLS",
+                    "Implementazione del piano di emergenza",
+                    "Verifica compliance normativa completa"
+                ];
+            } else {
+                level = "CRITICO";
+                color = "#ef4444";
+                description = "ALLERTA: La situazione richiede un intervento immediato. L'azienda è esposta a rischi significativi e possibili sanzioni.";
+                recommendations = [
+                    "URGENTE: Contattare immediatamente un consulente di sicurezza",
+                    "Sospendere attività ad alto rischio fino a messa in sicurezza",
+                    "Avviare piano di adeguamento normativo completo",
+                    "Formazione immediata di tutto il personale",
+                    "Implementazione sistema gestione sicurezza strutturato",
+                    "Audit completo e gap analysis dettagliata"
+                ];
+            }
+
+            const resultsHTML = `
+                <div class="score-circle" style="background: ${color}">
+                    ${percentage}<span style="font-size: 0.4em">%</span>
+                </div>
+                <div class="result-title">${level}</div>
+                <div class="result-description">${description}</div>
+                <div class="recommendations">
+                    <h3>📋 Raccomandazioni:</h3>
+                    <ul>
+                        ${recommendations.map(r => `<li>${r}</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="cta-section">
+                    <h3>Vuoi migliorare la sicurezza della tua azienda?</h3>
+                    <p>Il team di Delivery Care SRL è a tua disposizione per consulenze personalizzate, audit di sicurezza e programmi di formazione su misura.</p>
+                    <button class="contact-btn" onclick="window.open('https://www.deliverycare.it', '_blank')">
+                        Contattaci Ora
+                    </button>
+                </div>
+                <button class="restart-btn" onclick="restartQuiz()">🔄 Rifai il Quiz</button>
+            `;
+
+            document.getElementById('quizContent').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('results').innerHTML = resultsHTML;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answers = [];
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('intro').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
